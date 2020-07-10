@@ -1,14 +1,18 @@
+require('dotenv').config({
+  path: `.env`,
+});
+
 module.exports = {
   siteMetadata: {
-    title: `Gatsby Starter Blog`,
+    title: `WpGraphQL Yoast SEO Demo`,
     author: {
-      name: `Kyle Mathews`,
-      summary: `who lives and works in San Francisco building useful things.`,
+      name: `Ash Hitchcock`,
+      summary: `Creator of WPGraphQl Yoast SEO Plugin`,
     },
-    description: `A starter blog demonstrating what Gatsby can do.`,
-    siteUrl: `https://gatsby-starter-blog-demo.netlify.app/`,
+    description: `A starter blog demonstrating what WPGraphQl Yoast SEO Plugin can do.`,
+    siteUrl: `https://demo.wpgraphqlseo.com/`,
     social: {
-      twitter: `kylemathews`,
+      twitter: `ash_hitchcock`,
     },
   },
   plugins: [
@@ -53,10 +57,11 @@ module.exports = {
     {
       resolve: `gatsby-plugin-google-analytics`,
       options: {
-        //trackingId: `ADD YOUR TRACKING ID HERE`,
+        // trackingId: `ADD YOUR TRACKING ID HERE`,
       },
     },
     `gatsby-plugin-feed`,
+    `gatsby-plugin-sitemap`,
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
@@ -69,15 +74,54 @@ module.exports = {
         icon: `content/assets/gatsby-icon.png`,
       },
     },
+    {
+      resolve: `gatsby-source-wordpress-experimental`,
+      options: {
+        url: process.env.GATSBY_WORDPRESS_API_URL,
+        verbose: true,
+        schema: {
+          queryDepth: 5,
+          typePrefix: `Wp`,
+          timeout: 30000,
+        },
+        develop: {
+          nodeUpdateInterval: 3000,
+          hardCacheMediaFiles: false,
+        },
+        production: {
+          hardCacheMediaFiles: true,
+        },
+        debug: {
+          // these settings are all the defaults,
+          // remove them if you'd like
+          graphql: {
+            showQueryOnError: false,
+            showQueryVarsOnError: true,
+            copyQueryOnError: true,
+            panicOnError: true,
+            // a critical error is a WPGraphQL query that returns an error and no response data. Currently WPGQL will error if we try to access private posts so if this is false it returns a lot of irrelevant errors.
+            onlyReportCriticalErrors: true,
+          },
+        },
+        type: {
+          Post: {
+            limit:
+              process.env.NODE_ENV === `development` // Lets just pull 50 posts in development to make it easy on ourselves.
+                ? 50 // and we don't actually need more than 5000 in production for this particular site
+                : 5000,
+          },
+        },
+      },
+    },
     `gatsby-plugin-react-helmet`,
     {
       resolve: `gatsby-plugin-typography`,
       options: {
         pathToConfigModule: `src/utils/typography`,
       },
-    },
-    // this (optional) plugin enables Progressive Web App + Offline functionality
+    }, // this (optional) plugin enables Progressive Web App + Offline functionality
     // To learn more, visit: https://gatsby.dev/offline
     // `gatsby-plugin-offline`,
+    'gatsby-plugin-typescript',
   ],
-}
+};

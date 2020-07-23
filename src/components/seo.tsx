@@ -16,8 +16,13 @@ interface SeoProps {
   title?: String;
   lang?: String;
   meta?: MetaProps[];
-  seo?: any;
+  seo: any;
 }
+
+const capitalise = (s) => {
+  if (typeof s !== 'string') return '';
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
 
 const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
   const { site, wp } = useStaticQuery(
@@ -95,7 +100,6 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
   );
 
   const { schema, webmaster, social } = wp.seo;
-  //  console.log({ schema, webmaster, social });
 
   const verification: MetaProps[] = [];
 
@@ -130,10 +134,63 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
     });
   }
 
-  const metaDescription = seo && seo.metaDesc ? seo.metaDesc : site.siteMetadata.description;
   const metaTitle = title || seo.title;
+  const metaDescription = seo && seo.metaDesc ? seo.metaDesc : site.siteMetadata.description;
+
+  const pageUrl = seo.canonical || schema.siteUrl;
 
   // const logo = schema.logo && schema.logo.localFile.childImageSharp.fixed;
+
+  const sameAs = Object.entries(social).map(([account, { url, username }]) => {
+    if (username || url) {
+      return username && account === 'twitter' ? `https://www.twitter.com/${username}` : url;
+    }
+  });
+
+  const logo = schema.logo
+    ? {
+        '@type': 'ImageObject',
+        '@id': `${schema.siteUrl}/#${schema.companyOrPerson === 'person' ? 'personlogo' : 'logo'}`,
+        inLanguage: 'en-GB',
+        url: schema.logo?.localFile?.childImageSharp?.fixed.src,
+        width: schema.logo?.localFile?.childImageSharp?.fixed.width,
+        height: schema.logo?.localFile?.childImageSharp?.fixed.height,
+        caption: schema.logo.altText,
+      }
+    : null;
+
+  const image = schema.logo
+    ? {
+        '@id': `${schema.siteUrl}/#${schema.companyOrPerson === 'person' ? 'personlogo' : 'logo'}`,
+      }
+    : null;
+
+  // TODO use canonical for page ID
+  const schemaObj = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': schema.companyOrPerson === 'person' ? ['Person', 'Organization'] : 'Organization',
+        '@id': `${schema.siteUrl}/#${schema.companyOrPerson === 'person' ? '/schema/person' : 'organization'}`,
+        name: schema.siteName,
+        url: schema.siteUrl,
+        sameAs,
+        [schema.companyOrPerson === 'person' ? 'image' : 'logo']: logo,
+        [schema.companyOrPerson === 'person' ? 'logo' : 'image']: image,
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${schema.siteUrl}/#website`,
+        url: schema.siteUrl,
+        name: metaTitle,
+        description: metaDescription,
+        publisher: {
+          '@id': `${schema.siteUrl}/#organization`,
+        },
+        inLanguage: 'en-GB',
+      },
+    ],
+  };
 
   return (
     <Helmet
@@ -189,7 +246,10 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
       ]
         .filter((m) => !!m.content)
         .concat(meta, verification)}
-    />
+      encodeSpecialCharacters={false}
+    >
+      <script type="application/ld+json">{JSON.stringify(schemaObj)}</script>
+    </Helmet>
   );
 };
 

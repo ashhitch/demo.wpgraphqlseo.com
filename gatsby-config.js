@@ -41,7 +41,7 @@ module.exports = {
       resolve: `gatsby-source-wordpress-experimental`,
       options: {
         url: process.env.GATSBY_WORDPRESS_API_URL,
-        verbose: true,
+        verbose: false,
         schema: {
           queryDepth: 5,
           typePrefix: `Wp`,
@@ -49,7 +49,7 @@ module.exports = {
         },
         develop: {
           nodeUpdateInterval: 3000,
-          hardCacheMediaFiles: false,
+          hardCacheMediaFiles: true,
         },
         production: {
           hardCacheMediaFiles: true,

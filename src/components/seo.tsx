@@ -38,6 +38,7 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
             }
             schema {
               companyName
+              personName
               companyOrPerson
               wordpressSiteName
               siteUrl
@@ -152,7 +153,7 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
         '@type': 'ImageObject',
         '@id': `${schema.siteUrl}/#${schema.companyOrPerson === 'person' ? 'personlogo' : 'logo'}`,
         inLanguage: 'en-GB',
-        url: schema.logo?.localFile?.childImageSharp?.fixed.src,
+        url: `${schema.siteUrl}${schema.logo?.localFile?.childImageSharp?.fixed.src}`,
         width: schema.logo?.localFile?.childImageSharp?.fixed.width,
         height: schema.logo?.localFile?.childImageSharp?.fixed.height,
         caption: schema.logo.altText,
@@ -165,7 +166,6 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
       }
     : null;
 
-  // TODO use canonical for page ID
   const schemaObj = {
     '@context': 'https://schema.org',
     '@graph': [

@@ -16,7 +16,46 @@ interface SeoProps {
   title?: String;
   lang?: String;
   meta?: MetaProps[];
-  seo: any;
+  post?: any;
+}
+
+interface IOrgSchema {
+  [x: string]: any;
+  '@type': string | string[];
+  '@id': string;
+  name: any;
+  url: any;
+  sameAs: any[];
+}
+
+interface IWebsiteSchema {
+  '@type': string;
+  '@id': string;
+  url: any;
+  name: any;
+  description: any;
+  publisher: {
+    '@id': string;
+  };
+  inLanguage: String;
+}
+
+interface IPageSchema {
+  '@type': any;
+  '@id': string;
+  url: string;
+  name: any;
+  isPartOf: {
+    '@id': string;
+  };
+  description: any;
+  inLanguage: String;
+  potentialAction: {
+    '@type': string;
+    target: string[];
+  }[];
+  datePublished?: string;
+  dateModified?: string;
 }
 
 const capitalise = (s) => {
@@ -24,7 +63,9 @@ const capitalise = (s) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
-const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
+const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title }) => {
+  const inLanguage = lang;
+  const { seo } = post;
   console.log(seo);
   const { site, wp } = useStaticQuery(
     graphql`
@@ -139,7 +180,7 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
   const metaTitle = title || seo.title;
   const metaDescription = seo && seo.metaDesc ? seo.metaDesc : site.siteMetadata.description;
 
-  const pageUrl = seo.canonical || `${schema.siteUrl}/${seo.uri}`;
+  const pageUrl = seo.canonical || `${schema.siteUrl}/${post.uri}`;
 
   // const logo = schema.logo && schema.logo.localFile.childImageSharp.fixed;
 
@@ -153,7 +194,7 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
     ? {
         '@type': 'ImageObject',
         '@id': `${schema.siteUrl}/#${schema.companyOrPerson === 'person' ? 'personlogo' : 'logo'}`,
-        inLanguage: 'en-GB',
+        inLanguage,
         url: `${schema.siteUrl}${schema.logo?.localFile?.childImageSharp?.fixed.src}`,
         width: schema.logo?.localFile?.childImageSharp?.fixed.width,
         height: schema.logo?.localFile?.childImageSharp?.fixed.height,
@@ -167,53 +208,54 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
       }
     : null;
 
-  const schemaObj = {
-    '@context': 'https://schema.org',
-    '@graph': [
+  const orgSchema: IOrgSchema = {
+    '@type': schema.companyOrPerson === 'person' ? ['Person', 'Organization'] : 'Organization',
+    '@id': `${schema.siteUrl}/#${schema.companyOrPerson === 'person' ? '/schema/person' : 'organization'}`,
+    name: schema.siteName,
+    url: schema.siteUrl,
+    sameAs,
+    [schema.companyOrPerson === 'person' ? 'image' : 'logo']: logo,
+    [schema.companyOrPerson === 'person' ? 'logo' : 'image']: image,
+  };
+
+  const websiteSchema: IWebsiteSchema = {
+    '@type': 'WebSite',
+    '@id': `${schema.siteUrl}/#website`,
+    url: schema.siteUrl,
+    name: metaTitle,
+    description: metaDescription,
+    publisher: {
+      '@id': `${schema.siteUrl}/#organization`,
+    },
+    inLanguage,
+  };
+
+  const pageSchema: IPageSchema = {
+    '@type': seo?.schema?.pageType ? seo.schema.pageType : ['WebPage'],
+    '@id': `${pageUrl}#webpage`,
+    url: `${pageUrl}`,
+    name: seo.title,
+    isPartOf: { '@id': `${schema.siteUrl}/#website` },
+    description: seo.description,
+    inLanguage,
+    potentialAction: [
       {
-        '@type': schema.companyOrPerson === 'person' ? ['Person', 'Organization'] : 'Organization',
-        '@id': `${schema.siteUrl}/#${schema.companyOrPerson === 'person' ? '/schema/person' : 'organization'}`,
-        name: schema.siteName,
-        url: schema.siteUrl,
-        sameAs,
-        [schema.companyOrPerson === 'person' ? 'image' : 'logo']: logo,
-        [schema.companyOrPerson === 'person' ? 'logo' : 'image']: image,
-      },
-      {
-        '@type': 'WebSite',
-        '@id': `${schema.siteUrl}/#website`,
-        url: schema.siteUrl,
-        name: metaTitle,
-        description: metaDescription,
-        publisher: {
-          '@id': `${schema.siteUrl}/#organization`,
-        },
-        inLanguage: 'en-GB',
-      },
-      {
-        '@type': seo?.schema?.pageType ? seo.schema.pageType : ['WebPage'],
-        '@id': `${pageUrl}#webpage`,
-        url: `${pageUrl}`,
-        name: seo.title,
-        isPartOf: { '@id': `${schema.siteUrl}/#website` },
-        primaryImageOfPage: {
-          '@id': `${pageUrl}/about#primaryimage`,
-        },
-        datePublished: '2013-03-15T23:21:12+00:00',
-        dateModified: '2020-09-09T18:55:11+00:00',
-        description: seo.description,
-        breadcrumb: {
-          '@id': `${pageUrl}/about#breadcrumb`,
-        },
-        inLanguage: 'en-GB',
-        potentialAction: [
-          {
-            '@type': 'ReadAction',
-            target: [pageUrl],
-          },
-        ],
+        '@type': 'ReadAction',
+        target: [pageUrl],
       },
     ],
+  };
+
+  if (post.date) {
+    pageSchema.datePublished = new Date(post.date).toString();
+  }
+  if (post.modified) {
+    pageSchema.dateModified = new Date(post.modified).toString();
+  }
+
+  const schemaObj = {
+    '@context': 'https://schema.org',
+    '@graph': [orgSchema, websiteSchema, pageSchema],
   };
 
   console.log(schemaObj);

@@ -11,7 +11,7 @@ const PageTemplate = ({ data, pageContext, location }) => {
 
   return (
     <Layout location={location} title={siteTitle}>
-      <SEO seo={page.seo} />
+      <SEO post={page} />
       <article>
         <header>
           <h1

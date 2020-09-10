@@ -49,6 +49,7 @@ export const pageQuery = graphql`
       content
       uri
       date
+      modified
       seo {
         title
         metaDesc
@@ -69,6 +70,10 @@ export const pageQuery = graphql`
           altText
           sourceUrl
           srcSet
+        }
+        schema {
+          pageType
+          articleType
         }
       }
     }

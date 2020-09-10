@@ -25,6 +25,7 @@ const capitalise = (s) => {
 };
 
 const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
+  console.log(seo);
   const { site, wp } = useStaticQuery(
     graphql`
       query {
@@ -138,7 +139,7 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
   const metaTitle = title || seo.title;
   const metaDescription = seo && seo.metaDesc ? seo.metaDesc : site.siteMetadata.description;
 
-  const pageUrl = seo.canonical || schema.siteUrl;
+  const pageUrl = seo.canonical || `${schema.siteUrl}/${seo.uri}`;
 
   // const logo = schema.logo && schema.logo.localFile.childImageSharp.fixed;
 
@@ -189,9 +190,33 @@ const SEO: FC<SeoProps> = ({ seo = {}, lang = 'en', meta = [], title }) => {
         },
         inLanguage: 'en-GB',
       },
+      {
+        '@type': seo?.schema?.pageType ? seo.schema.pageType : ['WebPage'],
+        '@id': `${pageUrl}#webpage`,
+        url: `${pageUrl}`,
+        name: seo.title,
+        isPartOf: { '@id': `${schema.siteUrl}/#website` },
+        primaryImageOfPage: {
+          '@id': `${pageUrl}/about#primaryimage`,
+        },
+        datePublished: '2013-03-15T23:21:12+00:00',
+        dateModified: '2020-09-09T18:55:11+00:00',
+        description: seo.description,
+        breadcrumb: {
+          '@id': `${pageUrl}/about#breadcrumb`,
+        },
+        inLanguage: 'en-GB',
+        potentialAction: [
+          {
+            '@type': 'ReadAction',
+            target: [pageUrl],
+          },
+        ],
+      },
     ],
   };
 
+  console.log(schemaObj);
   return (
     <Helmet
       htmlAttributes={{

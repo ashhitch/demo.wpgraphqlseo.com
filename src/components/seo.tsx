@@ -3,9 +3,10 @@
  *  Gatsby's useStaticQuery React hook
  */
 
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
 import { Helmet } from 'react-helmet';
-import { useStaticQuery, graphql } from 'gatsby';
+
+import SEOContext from './SeoContext';
 
 interface MetaProps {
   name?: string;
@@ -17,6 +18,7 @@ interface SeoProps {
   lang?: String;
   meta?: MetaProps[];
   post?: any;
+  uri?: null;
 }
 
 interface IOrgSchema {
@@ -63,86 +65,15 @@ const capitalise = (s) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
-const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title }) => {
+const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title, uri }) => {
   const inLanguage = lang;
   const { seo } = post;
-  console.log(seo);
-  const { site, wp } = useStaticQuery(
-    graphql`
-      query {
-        wp {
-          seo {
-            webmaster {
-              googleVerify
-              yandexVerify
-              msVerify
-              baiduVerify
-            }
-            schema {
-              companyName
-              personName
-              companyOrPerson
-              wordpressSiteName
-              siteUrl
-              siteName
-              logo {
-                mediaItemUrl
-                altText
-                localFile {
-                  childImageSharp {
-                    fixed(width: 1600) {
-                      src
-                      width
-                      height
-                    }
-                  }
-                }
-              }
-            }
 
-            social {
-              facebook {
-                url
-                defaultImage {
-                  mediaItemUrl
-                }
-              }
-              instagram {
-                url
-              }
-              linkedIn {
-                url
-              }
-              mySpace {
-                url
-              }
-              pinterest {
-                url
-                metaTag
-              }
-              twitter {
-                username
-              }
-              wikipedia {
-                url
-              }
-              youTube {
-                url
-              }
-            }
-          }
-        }
-        site {
-          siteMetadata {
-            title
-            description
-          }
-        }
-      }
-    `
-  );
+  const { global, site } = useContext(SEOContext);
 
-  const { schema, webmaster, social } = wp.seo;
+  console.log({ global, site, post });
+
+  const { schema, webmaster, social } = global;
 
   const verification: MetaProps[] = [];
 
@@ -178,9 +109,9 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title }) => {
   }
 
   const metaTitle = title || seo.title;
-  const metaDescription = seo && seo.metaDesc ? seo.metaDesc : site.siteMetadata.description;
+  const metaDescription = seo?.metaDesc ? seo.metaDesc : site.siteMetadata.description;
 
-  const pageUrl = seo.canonical || `${schema.siteUrl}/${post.uri}`;
+  const pageUrl = seo?.canonical || `${schema.siteUrl}${post?.uri || uri}`;
 
   // const logo = schema.logo && schema.logo.localFile.childImageSharp.fixed;
 
@@ -230,27 +161,29 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title }) => {
     inLanguage,
   };
 
-  const pageSchema: IPageSchema = {
-    '@type': seo?.schema?.pageType ? seo.schema.pageType : ['WebPage'],
-    '@id': `${pageUrl}#webpage`,
-    url: `${pageUrl}`,
-    name: seo.title,
-    isPartOf: { '@id': `${schema.siteUrl}/#website` },
-    description: seo.description,
-    inLanguage,
-    potentialAction: [
-      {
-        '@type': 'ReadAction',
-        target: [pageUrl],
-      },
-    ],
-  };
+  const pageSchema: IPageSchema | null = post?.seo
+    ? {
+        '@type': seo?.schema?.pageType ? seo.schema.pageType : ['WebPage'],
+        '@id': `${pageUrl}#webpage`,
+        url: `${pageUrl}`,
+        name: seo.title,
+        isPartOf: { '@id': `${schema.siteUrl}/#website` },
+        description: seo?.description,
+        inLanguage,
+        potentialAction: [
+          {
+            '@type': 'ReadAction',
+            target: [pageUrl],
+          },
+        ],
+      }
+    : null;
 
-  if (post.date) {
-    pageSchema.datePublished = new Date(post.date).toString();
+  if (pageSchema && post?.date) {
+    pageSchema.datePublished = post.date;
   }
-  if (post.modified) {
-    pageSchema.dateModified = new Date(post.modified).toString();
+  if (pageSchema && post?.modified) {
+    pageSchema.dateModified = post.modified;
   }
 
   const schemaObj = {
@@ -258,7 +191,6 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title }) => {
     '@graph': [orgSchema, websiteSchema, pageSchema],
   };
 
-  console.log(schemaObj);
   return (
     <Helmet
       htmlAttributes={{
@@ -276,15 +208,15 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title }) => {
         },
         {
           property: `og:site_name`,
-          content: schema.companyName,
+          content: schema?.companyName,
         },
         {
           property: `og:title`,
-          content: seo.opengraphTitle || metaTitle,
+          content: seo?.opengraphTitle || metaTitle,
         },
         {
           property: `og:description`,
-          content: seo.opengraphDescription,
+          content: seo?.opengraphDescription,
         },
         {
           property: `og:locale`,
@@ -296,19 +228,19 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title }) => {
         },
         {
           name: `twitter:card`,
-          content: social.twitter.cardType,
+          content: social?.twitter.cardType,
         },
         {
           name: `twitter:creator`,
-          content: social.twitter.username,
+          content: social?.twitter.username,
         },
         {
           name: `twitter:title`,
-          content: seo.twitterTitle || metaTitle,
+          content: seo?.twitterTitle || metaTitle,
         },
         {
           name: `twitter:description`,
-          content: seo.twitterDescription || metaDescription,
+          content: seo?.twitterDescription || metaDescription,
         },
       ]
         .filter((m) => !!m.content)

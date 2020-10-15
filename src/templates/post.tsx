@@ -99,6 +99,7 @@ export const pageQuery = graphql`
       modified
       seo {
         title
+        canonical
         metaDesc
         focuskw
         metaKeywords

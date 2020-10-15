@@ -1,9 +1,86 @@
 import React from 'react';
-import { Link } from 'gatsby';
+import { graphql, Link, useStaticQuery } from 'gatsby';
 
 import { rhythm, scale } from '../utils/typography';
 
+import SEOContext from './SeoContext';
+
 const Layout = ({ location, title, children }) => {
+  const { site, wp } = useStaticQuery(
+    graphql`
+      query {
+        wp {
+          seo {
+            webmaster {
+              googleVerify
+              yandexVerify
+              msVerify
+              baiduVerify
+            }
+            schema {
+              companyName
+              personName
+              companyOrPerson
+              wordpressSiteName
+              siteUrl
+              siteName
+              logo {
+                mediaItemUrl
+                altText
+                localFile {
+                  childImageSharp {
+                    fixed(width: 1600) {
+                      src
+                      width
+                      height
+                    }
+                  }
+                }
+              }
+            }
+
+            social {
+              facebook {
+                url
+                defaultImage {
+                  mediaItemUrl
+                }
+              }
+              instagram {
+                url
+              }
+              linkedIn {
+                url
+              }
+              mySpace {
+                url
+              }
+              pinterest {
+                url
+                metaTag
+              }
+              twitter {
+                username
+              }
+              wikipedia {
+                url
+              }
+              youTube {
+                url
+              }
+            }
+          }
+        }
+        site {
+          siteMetadata {
+            title
+            description
+          }
+        }
+      }
+    `
+  );
+
   const rootPath = `${__PATH_PREFIX__}/`;
   let header;
 
@@ -48,22 +125,24 @@ const Layout = ({ location, title, children }) => {
     );
   }
   return (
-    <div
-      style={{
-        marginLeft: `auto`,
-        marginRight: `auto`,
-        maxWidth: rhythm(24),
-        padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
-      }}
-    >
-      <header>{header}</header>
-      <main>{children}</main>
-      <footer>
-        © {new Date().getFullYear()}, Built with
-        {` `}
-        <a href="https://www.gatsbyjs.org">Gatsby</a>
-      </footer>
-    </div>
+    <SEOContext.Provider value={{ global: wp.seo, site }}>
+      <div
+        style={{
+          marginLeft: `auto`,
+          marginRight: `auto`,
+          maxWidth: rhythm(24),
+          padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
+        }}
+      >
+        <header>{header}</header>
+        <main>{children}</main>
+        <footer>
+          © {new Date().getFullYear()}, Built with
+          {` `}
+          <a href="https://www.gatsbyjs.org">Gatsby</a>
+        </footer>
+      </div>
+    </SEOContext.Provider>
   );
 };
 

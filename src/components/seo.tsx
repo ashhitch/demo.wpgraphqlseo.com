@@ -1,8 +1,3 @@
-/**
- * SEO component that queries for data with
- *  Gatsby's useStaticQuery React hook
- */
-
 import React, { FC, useContext } from 'react';
 import { Helmet } from 'react-helmet';
 
@@ -15,7 +10,6 @@ interface MetaProps {
 }
 interface SeoProps {
   title?: String;
-  lang?: String;
   meta?: MetaProps[];
   post?: any;
   uri?: null;
@@ -65,11 +59,11 @@ const capitalise = (s) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
-const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title, uri }) => {
-  const inLanguage = lang;
+const SEO: FC<SeoProps> = ({ post = {}, meta = [], title, uri }) => {
   const { seo } = post;
 
   const { global, site } = useContext(SEOContext);
+  const inLanguage = global?.schema?.inLanguage;
 
   console.log({ global, site, post });
 
@@ -115,11 +109,13 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title, uri })
 
   // const logo = schema.logo && schema.logo.localFile.childImageSharp.fixed;
 
-  const sameAs = Object.entries(social).map(([account, { url, username }]) => {
-    if (username || url) {
-      return username && account === 'twitter' ? `https://www.twitter.com/${username}` : url;
-    }
-  });
+  const sameAs = Object.entries(social)
+    .map(([account, { url, username }]) => {
+      if (username || url) {
+        return username && account === 'twitter' ? `https://www.twitter.com/${username}` : url;
+      }
+    })
+    .filter((acc) => !!acc);
 
   const logo = schema.logo
     ? {
@@ -150,7 +146,7 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title, uri })
   };
 
   const websiteSchema: IWebsiteSchema = {
-    '@type': 'WebSite',
+    '@type': seo?.schema?.articleType && seo.schema.articleType.length >= 1 ? seo.schema.articleType : 'WebSite',
     '@id': `${schema.siteUrl}/#website`,
     url: schema.siteUrl,
     name: metaTitle,
@@ -194,7 +190,7 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title, uri })
   return (
     <Helmet
       htmlAttributes={{
-        lang,
+        lang: inLanguage,
       }}
       title={metaTitle}
       meta={[
@@ -247,7 +243,7 @@ const SEO: FC<SeoProps> = ({ post = {}, lang = 'en-GB', meta = [], title, uri })
         .concat(meta, verification)}
       encodeSpecialCharacters={false}
     >
-      <script type="application/ld+json">{JSON.stringify(schemaObj)}</script>
+      <script type="application/ld+json">{JSON.stringify(schemaObj, null, 2)}</script>
     </Helmet>
   );
 };

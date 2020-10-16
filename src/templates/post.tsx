@@ -11,7 +11,7 @@ const BlogPostTemplate = ({ data, pageContext, location }) => {
   const post = data.wpPost;
   const siteTitle = data.site.siteMetadata.title;
   const { previous, next } = pageContext;
-
+  console.log({ post });
   return (
     <Layout location={location} title={siteTitle}>
       <SEO post={post} />

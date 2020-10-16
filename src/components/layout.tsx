@@ -11,6 +11,20 @@ const Layout = ({ location, title, children }) => {
       query {
         wp {
           seo {
+            contentTypes {
+              post {
+                title
+                schemaType
+                metaRobotsNoindex
+                metaDesc
+              }
+              page {
+                metaDesc
+                metaRobotsNoindex
+                schemaType
+                title
+              }
+            }
             webmaster {
               googleVerify
               yandexVerify
@@ -24,6 +38,7 @@ const Layout = ({ location, title, children }) => {
               wordpressSiteName
               siteUrl
               siteName
+              inLanguage
               logo {
                 mediaItemUrl
                 altText

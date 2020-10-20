@@ -54,18 +54,13 @@ interface IPageSchema {
   dateModified?: string;
 }
 
-const capitalise = (s) => {
-  if (typeof s !== 'string') return '';
-  return s.charAt(0).toUpperCase() + s.slice(1);
-};
-
 const SEO: FC<SeoProps> = ({ post = {}, meta = [], title, uri }) => {
   const { seo } = post;
 
-  const { global, site } = useContext(SEOContext);
+  const { global } = useContext(SEOContext);
   const inLanguage = global?.schema?.inLanguage;
 
-  console.log({ global, site, post });
+  console.log({ global, post });
 
   const { schema, webmaster, social } = global;
 
@@ -103,7 +98,7 @@ const SEO: FC<SeoProps> = ({ post = {}, meta = [], title, uri }) => {
   }
 
   const metaTitle = title || seo.title;
-  const metaDescription = seo?.metaDesc ? seo.metaDesc : site.siteMetadata.description;
+  const metaDescription = seo?.metaDesc ? seo.metaDesc : '';
 
   const pageUrl = seo?.canonical || `${schema.siteUrl}${post?.uri || uri}`;
 

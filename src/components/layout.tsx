@@ -139,6 +139,8 @@ const Layout = ({ location, title, children }) => {
       </h3>
     );
   }
+
+  console.log(JSON.stringify(wp.seo, null, 2));
   return (
     <SEOContext.Provider value={{ global: wp.seo, site }}>
       <div

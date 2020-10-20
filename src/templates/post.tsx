@@ -2,9 +2,9 @@ import React from 'react';
 import { Link, graphql } from 'gatsby';
 
 import { formatDistance } from 'date-fns';
+import SEO from 'gatsby-plugin-wpgraphql-seo';
 import Bio from '../components/bio';
 import Layout from '../components/layout';
-import SEO from '../components/seo';
 import { rhythm, scale } from '../utils/typography';
 
 const BlogPostTemplate = ({ data, pageContext, location }) => {

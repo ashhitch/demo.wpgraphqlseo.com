@@ -4,7 +4,7 @@ import { Link, graphql } from 'gatsby';
 import { formatDistance } from 'date-fns';
 import Image from 'gatsby-image';
 import Layout from '../components/layout';
-import SEO from '../components/seo';
+import SEO from 'gatsby-plugin-wpgraphql-seo';
 import { rhythm } from '../utils/typography';
 
 const BlogIndex = ({ data, pageContext: { hasNextPage, pageInt }, location }) => {

@@ -1,9 +1,8 @@
 import React from 'react';
 import { graphql, Link, useStaticQuery } from 'gatsby';
 
+import { SEOContext } from 'gatsby-plugin-wpgraphql-seo';
 import { rhythm, scale } from '../utils/typography';
-
-import SEOContext from './SeoContext';
 
 const Layout = ({ location, title, children }) => {
   const { site, wp } = useStaticQuery(
@@ -142,7 +141,7 @@ const Layout = ({ location, title, children }) => {
 
   console.log(JSON.stringify(wp.seo, null, 2));
   return (
-    <SEOContext.Provider value={{ global: wp.seo, site }}>
+    <SEOContext.Provider value={{ global: wp.seo }}>
       <div
         style={{
           marginLeft: `auto`,

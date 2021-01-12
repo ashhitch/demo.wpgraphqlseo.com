@@ -16,7 +16,12 @@
     "source.fixAll.eslint": true
   },
   "eslint.enable": true,
-  "prettier.disableLanguages": ["javascript", "typescript", "typescriptreact", "javascriptreact"],
+  "prettier.disableLanguages": [
+    "javascript",
+    "typescript",
+    "typescriptreact",
+    "javascriptreact"
+  ],
   "npm.packageManager": "yarn",
   "typescript.tsdk": "node_modules/typescript/lib"
 }

@@ -1,35 +1,74 @@
 import React from 'react';
 import { Link, graphql } from 'gatsby';
-import Layout from '../components/layout';
-import SEO from '../components/seo';
-import { rhythm } from '../utils/typography';
+import { GatsbyImage } from 'gatsby-plugin-image';
+import parse from 'html-react-parser';
 
-const PageTemplate = ({ data, pageContext, location }) => {
-  const page = data.wpPage;
-  const siteTitle = data.site.siteMetadata.title;
-  const { previous, next } = pageContext;
+// We're using Gutenberg so we need the block styles
+import '@wordpress/block-library/build-style/style.css';
+import '@wordpress/block-library/build-style/theme.css';
+
+import Seo from 'gatsby-plugin-wpgraphql-seo';
+import Bio from '../components/bio';
+import Layout from '../components/layout';
+
+const PageTemplate = ({ data: { previous, next, post } }) => {
+  const featuredImage = {
+    img: post.featuredImage?.node?.localFile?.childImageSharp?.gatsbyImageData,
+    alt: post.featuredImage?.node?.alt || ``,
+  };
 
   return (
-    <Layout location={location} title={siteTitle}>
-      <SEO seo={page.seo} />
-      <article>
+    <Layout>
+      <Seo post={post} />
+
+      <article className="blog-post" itemScope itemType="http://schema.org/Article">
         <header>
-          <h1
-            style={{
-              marginTop: rhythm(1),
-              marginBottom: 0,
-            }}
-          >
-            {page.title}
-          </h1>
+          <h1 itemProp="headline">{parse(post.title)}</h1>
+
+          <p>{post.date}</p>
+
+          {/* if we have a featured image for this post let's display it */}
+          {featuredImage?.img && (
+            <GatsbyImage image={featuredImage.img} alt={featuredImage.alt} style={{ marginBottom: 50 }} />
+          )}
         </header>
-        <section dangerouslySetInnerHTML={{ __html: page.content }} />
-        <hr
-          style={{
-            marginBottom: rhythm(1),
-          }}
-        />
+
+        {!!post.content && <section itemProp="articleBody">{parse(post.content)}</section>}
+
+        <hr />
+
+        <footer>
+          <Bio />
+        </footer>
       </article>
+
+      <nav className="blog-post-nav">
+        <ul
+          style={{
+            display: `flex`,
+            flexWrap: `wrap`,
+            justifyContent: `space-between`,
+            listStyle: `none`,
+            padding: 0,
+          }}
+        >
+          <li>
+            {previous && (
+              <Link to={previous.uri} rel="prev">
+                ← {parse(previous.title)}
+              </Link>
+            )}
+          </li>
+
+          <li>
+            {next && (
+              <Link to={next.uri} rel="next">
+                {parse(next.title)} →
+              </Link>
+            )}
+          </li>
+        </ul>
+      </nav>
     </Layout>
   );
 };
@@ -37,18 +76,8 @@ const PageTemplate = ({ data, pageContext, location }) => {
 export default PageTemplate;
 
 export const pageQuery = graphql`
-  query GET_Page($id: String!) {
-    site {
-      siteMetadata {
-        title
-      }
-    }
-    wpPage(id: { eq: $id }) {
-      id
-      title
-      content
-      uri
-      date
+  query PageById($id: String!, $previousPostId: String, $nextPostId: String) {
+    post: wpPage(id: { eq: $id }) {
       seo {
         title
         metaDesc
@@ -70,7 +99,36 @@ export const pageQuery = graphql`
           sourceUrl
           srcSet
         }
+        canonical
+        cornerstone
+        schema {
+          articleType
+          pageType
+          raw
+        }
       }
+      id
+      content
+      title
+      date(formatString: "MMMM DD, YYYY")
+      featuredImage {
+        node {
+          altText
+          localFile {
+            childImageSharp {
+              gatsbyImageData(maxWidth: 1000, quality: 100, placeholder: TRACED_SVG, layout: FLUID)
+            }
+          }
+        }
+      }
+    }
+    previous: wpPage(id: { eq: $previousPostId }) {
+      uri
+      title
+    }
+    next: wpPage(id: { eq: $nextPostId }) {
+      uri
+      title
     }
   }
 `;

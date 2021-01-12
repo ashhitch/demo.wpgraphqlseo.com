@@ -1,35 +1,45 @@
-require('dotenv').config({
+require("dotenv").config({
   path: `.env`,
 });
+/**
+ * 👋 Hey there!
+ * This file is the starting point for your new WordPress/Gatsby site! 🚀
+ * For more information about what this file is and does, see
+ * https://www.gatsbyjs.com/docs/gatsby-config/
+ *
+ */
 
 module.exports = {
-  siteMetadata: {
-    title: `WpGraphQL Yoast SEO Demo`,
-    author: {
-      name: `Ash Hitchcock`,
-      summary: `Creator of WPGraphQl Yoast SEO Plugin`,
-    },
-    description: `A starter blog demonstrating what WPGraphQl Yoast SEO Plugin can do.`,
-    siteUrl: `https://demo.wpgraphqlseo.com/`,
-    social: {
-      twitter: `ash_hitchcock`,
-    },
-  },
+  /**
+   * Adding plugins to this array adds them to your Gatsby site.
+   *
+   * Gatsby has a rich ecosystem of plugins.
+   * If you need any more you can search here: https://www.gatsbyjs.com/plugins/
+   */
   plugins: [
+    {
+      /**
+       * First up is the WordPress source plugin that connects Gatsby
+       * to your WordPress site.
+       *
+       * visit the plugin docs to learn more
+       * https://github.com/gatsbyjs/gatsby-source-wordpress-experimental/blob/master/README.md
+       *
+       */
+      resolve: `gatsby-source-wordpress-experimental`,
+      options: {
+        // the only required plugin option for WordPress is the GraphQL url.
+        url: process.env.WPGRAPHQL_URL,
+      },
+    },
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
     {
-      resolve: `gatsby-plugin-google-analytics`,
-      options: {
-        // trackingId: `ADD YOUR TRACKING ID HERE`,
-      },
-    },
-    `gatsby-plugin-sitemap`,
-    {
+      // See https://www.gatsbyjs.com/plugins/gatsby-plugin-manifest/?=gatsby-plugin-manifest
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `WpGraphQL Yoast SEO Demo`,
-        short_name: `WpGraphQL SEO`,
+        name: `Gatsby Starter WordPress Blog`,
+        short_name: `GatsbyJS & WP`,
         start_url: `/`,
         background_color: `#ffffff`,
         theme_color: `#663399`,
@@ -37,54 +47,12 @@ module.exports = {
         icon: `content/assets/gatsby-icon.png`,
       },
     },
-    {
-      resolve: `gatsby-source-wordpress-experimental`,
-      options: {
-        url: process.env.GATSBY_WORDPRESS_API_URL,
-        verbose: true,
-        schema: {
-          queryDepth: 5,
-          typePrefix: `Wp`,
-          timeout: 30000,
-        },
-        develop: {
-          nodeUpdateInterval: 3000,
-          hardCacheMediaFiles: false,
-        },
-        production: {
-          hardCacheMediaFiles: true,
-        },
-        debug: {
-          // these settings are all the defaults,
-          // remove them if you'd like
-          graphql: {
-            showQueryOnError: false,
-            showQueryVarsOnError: true,
-            copyQueryOnError: true,
-            panicOnError: true,
-            // a critical error is a WPGraphQL query that returns an error and no response data. Currently WPGQL will error if we try to access private posts so if this is false it returns a lot of irrelevant errors.
-            onlyReportCriticalErrors: true,
-          },
-        },
-        type: {
-          Post: {
-            limit:
-              process.env.NODE_ENV === `development` // Lets just pull 50 posts in development to make it easy on ourselves.
-                ? 50 // and we don't actually need more than 5000 in production for this particular site
-                : 5000,
-          },
-        },
-      },
-    },
     `gatsby-plugin-react-helmet`,
-    {
-      resolve: `gatsby-plugin-typography`,
-      options: {
-        pathToConfigModule: `src/utils/typography`,
-      },
-    }, // this (optional) plugin enables Progressive Web App + Offline functionality
-    // To learn more, visit: https://gatsby.dev/offline
+    /**
+     * this (optional) plugin enables Progressive Web App + Offline functionality
+     * To learn more, visit: https://gatsby.dev/offline
+     */
     // `gatsby-plugin-offline`,
-    'gatsby-plugin-typescript',
+    "gatsby-plugin-typescript",
   ],
 };

@@ -1,57 +1,48 @@
 import React from 'react';
 import { Link, graphql } from 'gatsby';
+import { GatsbyImage } from 'gatsby-plugin-image';
+import parse from 'html-react-parser';
 
-import { formatDistance } from 'date-fns';
+// We're using Gutenberg so we need the block styles
+import '@wordpress/block-library/build-style/style.css';
+import '@wordpress/block-library/build-style/theme.css';
+
+import Seo from 'gatsby-plugin-wpgraphql-seo';
 import Bio from '../components/bio';
 import Layout from '../components/layout';
-import SEO from '../components/seo';
-import { rhythm, scale } from '../utils/typography';
 
-const BlogPostTemplate = ({ data, pageContext, location }) => {
-  const post = data.wpPost;
-  const siteTitle = data.site.siteMetadata.title;
-  const { previous, next } = pageContext;
+const BlogPostTemplate = ({ data: { previous, next, post } }) => {
+  const featuredImage = {
+    img: post.featuredImage?.node?.localFile?.childImageSharp?.gatsbyImageData,
+    alt: post.featuredImage?.node?.alt || ``,
+  };
 
   return (
-    <Layout location={location} title={siteTitle}>
-      <SEO seo={post.seo} />
-      <article>
+    <Layout>
+      <Seo post={post} />
+
+      <article className="blog-post" itemScope itemType="http://schema.org/Article">
         <header>
-          <h1
-            style={{
-              marginTop: rhythm(1),
-              marginBottom: 0,
-            }}
-          >
-            {post.title}
-          </h1>
-          <p
-            style={{
-              ...scale(-1 / 5),
-              display: `block`,
-              marginBottom: rhythm(1),
-            }}
-          >
-            {formatDistance(new Date(post.date), new Date(), { addSuffix: true })}
-          </p>
+          <h1 itemProp="headline">{parse(post.title)}</h1>
+
+          <p>{post.date}</p>
+
+          {/* if we have a featured image for this post let's display it */}
+          {featuredImage?.img && (
+            <GatsbyImage image={featuredImage.img} alt={featuredImage.alt} style={{ marginBottom: 50 }} />
+          )}
         </header>
-        <section dangerouslySetInnerHTML={{ __html: post.content }} />
-        <hr
-          style={{
-            marginBottom: rhythm(1),
-          }}
-        />
+
+        {!!post.content && <section itemProp="articleBody">{parse(post.content)}</section>}
+
+        <hr />
+
         <footer>
-          <Bio
-            name={post.author.node.name}
-            avatar={post.author.node.avatar?.url}
-            summary={post.author.node.description}
-            twitter={post.author.node.seo.social?.twitter}
-          />
+          <Bio />
         </footer>
       </article>
 
-      <nav>
+      <nav className="blog-post-nav">
         <ul
           style={{
             display: `flex`,
@@ -63,15 +54,16 @@ const BlogPostTemplate = ({ data, pageContext, location }) => {
         >
           <li>
             {previous && (
-              <Link to={previous.fields.slug} rel="prev">
-                ← {previous.title}
+              <Link to={previous.uri} rel="prev">
+                ← {parse(previous.title)}
               </Link>
             )}
           </li>
+
           <li>
             {next && (
-              <Link to={next.fields.slug} rel="next">
-                {next.title} →
+              <Link to={next.uri} rel="next">
+                {parse(next.title)} →
               </Link>
             )}
           </li>
@@ -84,18 +76,8 @@ const BlogPostTemplate = ({ data, pageContext, location }) => {
 export default BlogPostTemplate;
 
 export const pageQuery = graphql`
-  query GET_POST($id: String!) {
-    site {
-      siteMetadata {
-        title
-      }
-    }
-    wpPost(id: { eq: $id }) {
-      id
-      title
-      content
-      uri
-      date
+  query BlogPostById($id: String!, $previousPostId: String, $nextPostId: String) {
+    post: wpPost(id: { eq: $id }) {
       seo {
         title
         metaDesc
@@ -117,36 +99,37 @@ export const pageQuery = graphql`
           sourceUrl
           srcSet
         }
+        canonical
+        cornerstone
+        schema {
+          articleType
+          pageType
+          raw
+        }
       }
-      author {
+      id
+      excerpt
+      content
+      title
+      date(formatString: "MMMM DD, YYYY")
+      featuredImage {
         node {
-          name
-          slug
-          description
-          avatar {
-            url
-          }
-          seo {
-            social {
-              twitter
+          altText
+          localFile {
+            childImageSharp {
+              gatsbyImageData(maxWidth: 1000, quality: 100, placeholder: TRACED_SVG, layout: FLUID)
             }
           }
         }
       }
-      tags {
-        nodes {
-          name
-          link
-          uri
-        }
-      }
-      categories {
-        nodes {
-          name
-          link
-          uri
-        }
-      }
+    }
+    previous: wpPost(id: { eq: $previousPostId }) {
+      uri
+      title
+    }
+    next: wpPost(id: { eq: $nextPostId }) {
+      uri
+      title
     }
   }
 `;

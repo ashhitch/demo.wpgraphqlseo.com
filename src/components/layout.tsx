@@ -1,69 +1,118 @@
 import React from 'react';
-import { Link } from 'gatsby';
+import { Link, useStaticQuery, graphql } from 'gatsby';
+import parse from 'html-react-parser';
+import { SEOContext } from 'gatsby-plugin-wpgraphql-seo';
 
-import { rhythm, scale } from '../utils/typography';
+const Layout = ({ isHomePage = false, children }) => {
+  const {
+    wp: {
+      seo,
+      generalSettings: { title },
+    },
+  } = useStaticQuery(graphql`
+    query LayoutQuery {
+      wp {
+        generalSettings {
+          title
+          description
+        }
+        seo {
+          contentTypes {
+            post {
+              title
+              schemaType
+              metaRobotsNoindex
+              metaDesc
+            }
+            page {
+              metaDesc
+              metaRobotsNoindex
+              schemaType
+              title
+            }
+          }
+          webmaster {
+            googleVerify
+            yandexVerify
+            msVerify
+            baiduVerify
+          }
+          schema {
+            companyName
+            personName
+            companyOrPerson
+            wordpressSiteName
+            siteUrl
+            siteName
+            inLanguage
+            logo {
+              sourceUrl
+              mediaItemUrl
+              altText
+            }
+          }
+          social {
+            facebook {
+              url
+              defaultImage {
+                sourceUrl
+                mediaItemUrl
+              }
+            }
+            instagram {
+              url
+            }
+            linkedIn {
+              url
+            }
+            mySpace {
+              url
+            }
+            pinterest {
+              url
+              metaTag
+            }
+            twitter {
+              username
+            }
+            wikipedia {
+              url
+            }
+            youTube {
+              url
+            }
+          }
+        }
+      }
+    }
+  `);
 
-const Layout = ({ location, title, children }) => {
-  const rootPath = `${__PATH_PREFIX__}/`;
-  let header;
-
-  if (location.pathname === rootPath) {
-    header = (
-      <h1
-        style={{
-          ...scale(1.5),
-          marginBottom: rhythm(1.5),
-          marginTop: 0,
-        }}
-      >
-        <Link
-          style={{
-            boxShadow: `none`,
-            color: `inherit`,
-          }}
-          to="/"
-        >
-          {title}
-        </Link>
-      </h1>
-    );
-  } else {
-    header = (
-      <h3
-        style={{
-          fontFamily: `Montserrat, sans-serif`,
-          marginTop: 0,
-        }}
-      >
-        <Link
-          style={{
-            boxShadow: `none`,
-            color: `inherit`,
-          }}
-          to="/"
-        >
-          {title}
-        </Link>
-      </h3>
-    );
-  }
   return (
-    <div
-      style={{
-        marginLeft: `auto`,
-        marginRight: `auto`,
-        maxWidth: rhythm(24),
-        padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
-      }}
-    >
-      <header>{header}</header>
-      <main>{children}</main>
-      <footer>
-        © {new Date().getFullYear()}, Built with
-        {` `}
-        <a href="https://www.gatsbyjs.org">Gatsby</a>
-      </footer>
-    </div>
+    <SEOContext.Provider value={{ global: seo }}>
+      <div className="global-wrapper" data-is-root-path={isHomePage}>
+        <header className="global-header">
+          {isHomePage ? (
+            <h1 className="main-heading">
+              <Link to="/">{parse(title)}</Link>
+            </h1>
+          ) : (
+            <Link className="header-link-home" to="/">
+              {title}
+            </Link>
+          )}
+        </header>
+
+        <main>{children}</main>
+
+        <footer>
+          © {new Date().getFullYear()}, Built with
+          {` `}
+          <a href="https://www.gatsbyjs.com">Gatsby</a>
+          {` `}
+          And <a href="https://wordpress.org/">WordPress</a>
+        </footer>
+      </div>
+    </SEOContext.Provider>
   );
 };
 

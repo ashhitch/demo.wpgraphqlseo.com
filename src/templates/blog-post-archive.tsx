@@ -8,7 +8,7 @@ import Layout from '../components/layout';
 
 const BlogIndex = ({ data, pageContext: { nextPagePath, previousPagePath } }) => {
   const posts = data.allWpPost.nodes;
-
+  console.log(data?.wp?.seo?.contentTypes?.post?.schema?.raw);
   if (!posts.length) {
     return (
       <Layout isHomePage>
@@ -21,12 +21,17 @@ const BlogIndex = ({ data, pageContext: { nextPagePath, previousPagePath } }) =>
 
   return (
     <Layout isHomePage>
-      <Seo title="All posts" postSchema={JSON.parse(data.wp.contentTypes.post.schema.raw)} />
+      <Seo
+        title="All posts"
+        postSchema={
+          data?.wp?.seo?.contentTypes?.post?.schema?.raw && JSON.parse(data.wp.seo.contentTypes.post.schema.raw)
+        }
+      />
 
       <Bio />
 
       <ol style={{ listStyle: `none` }}>
-        {posts.map(post => {
+        {posts.map((post) => {
           const { title } = post;
 
           return (

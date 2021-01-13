@@ -8,7 +8,7 @@ import Layout from '../components/layout';
 
 const BlogIndex = ({ data, pageContext: { nextPagePath, previousPagePath } }) => {
   const posts = data.allWpPost.nodes;
-  console.log(data?.wp?.seo?.contentTypes?.post?.schema?.raw);
+
   if (!posts.length) {
     return (
       <Layout isHomePage>

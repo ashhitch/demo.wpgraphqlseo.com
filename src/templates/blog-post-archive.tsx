@@ -3,8 +3,9 @@ import { Link, graphql } from 'gatsby';
 import parse from 'html-react-parser';
 
 import Seo from 'gatsby-plugin-wpgraphql-seo';
-import Bio from '../components/bio';
+
 import Layout from '../components/layout';
+import Bio from '../components/bio';
 
 const BlogIndex = ({ data, pageContext: { nextPagePath, previousPagePath } }) => {
   const posts = data.allWpPost.nodes;
@@ -82,7 +83,7 @@ export const pageQuery = graphql`
       nodes {
         excerpt
         uri
-        date(formatString: "MMMM DD, YYYY")
+        date(formatString: "DD MMMM, YYYY")
         title
         excerpt
       }

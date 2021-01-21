@@ -1,20 +1,15 @@
 {
-  "include": ["./src/**/*"],
   "compilerOptions": {
-    "target": "esnext",
     "module": "commonjs",
-    "lib": ["dom", "es2017"],
-     "allowJs": true,
-    // "checkJs": true,
-    "jsx": "react",
-    "strict": true,
+    "target": "esnext",
+    "jsx": "preserve",
+    "lib": ["dom", "esnext"],
+    "strict": false,
+    "noEmit": false,
+    "isolatedModules": true,
     "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "noImplicitAny": false,
-    "resolveJsonModule": true
+    "noUnusedLocals": false,
+    "allowJs": true
   },
-  "exclude": ["node_modules", "**/*-spec.ts"]
+  "exclude": ["node_modules", "public", ".cache", "**/*-spec.ts"]
 }

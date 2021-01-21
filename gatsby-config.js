@@ -17,6 +17,11 @@ module.exports = {
    * If you need any more you can search here: https://www.gatsbyjs.com/plugins/
    */
   plugins: [
+    `gatsby-plugin-typescript`,   
+     `gatsby-plugin-image`,
+    `gatsby-transformer-sharp`,
+    `gatsby-plugin-sharp`,
+
     {
       /**
        * First up is the WordPress source plugin that connects Gatsby
@@ -36,15 +41,13 @@ module.exports = {
         }
       },
     },
-    `gatsby-plugin-image`,
-    `gatsby-transformer-sharp`,
-    `gatsby-plugin-sharp`,
+
     {
       // See https://www.gatsbyjs.com/plugins/gatsby-plugin-manifest/?=gatsby-plugin-manifest
       resolve: `gatsby-plugin-manifest`,
       options: {
         name: `Gatsby WordPress Yoast Seo`,
-        short_name: `GatsbyJS & WP`,
+        short_name: `WpGraphQL SEO`,
         start_url: `/`,
         background_color: `#ffffff`,
         theme_color: `#663399`,
@@ -58,6 +61,6 @@ module.exports = {
      * To learn more, visit: https://gatsby.dev/offline
      */
     // `gatsby-plugin-offline`,
-    "gatsby-plugin-typescript",
+  
   ],
 };

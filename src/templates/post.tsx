@@ -117,7 +117,7 @@ export const pageQuery = graphql`
           altText
           localFile {
             childImageSharp {
-              gatsbyImageData(maxWidth: 1000, quality: 100, placeholder: TRACED_SVG, layout: FLUID)
+              gatsbyImageData(maxWidth: 1000, quality: 90, layout: FLUID, placeholder: TRACED_SVG)
             }
           }
         }
